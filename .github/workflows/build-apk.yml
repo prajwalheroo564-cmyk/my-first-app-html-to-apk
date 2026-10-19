@@ -1,0 +1,61 @@
+
+name: Build Website APK
+
+on:
+  workflow_dispatch:
+    inputs:
+      app_name:
+        description: App display name
+        required: true
+        default: My First App
+      website_url:
+        description: HTTPS website URL
+        required: true
+        default: https://example.com
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout project
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.9'
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install Android SDK
+        run: |
+          sdkmanager "platforms;android-35" "build-tools;35.0.0"
+          yes | sdkmanager --licenses || true
+
+      - name: Build APK
+        env:
+          APP_NAME: ${{ inputs.app_name }}
+          WEBSITE_URL: ${{ inputs.website_url }}
+        run: |
+          python3 -c "import os,urllib.parse; u=urllib.parse.urlparse(os.environ['WEBSITE_URL']); assert u.scheme=='https' and u.netloc, 'HTTPS URL required'"
+          gradle --no-daemon assembleDebug \
+            -PappName="$APP_NAME" \
+            -PwebsiteUrl="$WEBSITE_URL"
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: my-first-app-apk
+          path: app/build/outputs/apk/debug/app-debug.apk
+          retention-days: 3
