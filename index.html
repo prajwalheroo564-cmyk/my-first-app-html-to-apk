@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#101827">
+<title>My First App — HTML to APK</title>
+<style>
+:root{color-scheme:dark;--bg:#0b1020;--card:#131c30;--line:#2a3854;--text:#eef4ff;--muted:#9cacc8;--accent:#7c9cff}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at top,#17294a,var(--bg) 55%);color:var(--text);font:16px system-ui,-apple-system,Segoe UI,sans-serif;min-height:100vh;display:grid;place-items:center;padding:22px}
+main{width:min(100%,560px)}.brand{display:flex;gap:13px;align-items:center;margin-bottom:24px}.logo{width:50px;height:50px;border-radius:15px;background:linear-gradient(135deg,#7c9cff,#9b70ff);display:grid;place-items:center;font-size:25px;font-weight:900;color:#081020}.sub{color:var(--muted);margin-top:4px}.card{background:rgba(19,28,48,.95);border:1px solid var(--line);border-radius:22px;padding:24px;box-shadow:0 20px 70px #0005}h1{font-size:25px;margin:0}h2{font-size:19px;margin:0 0 8px}p{line-height:1.5;color:var(--muted)}label{display:block;font-weight:650;margin:17px 0 8px}input{width:100%;padding:14px;border-radius:12px;border:1px solid var(--line);background:#0a1120;color:var(--text);font:inherit;outline:none}input:focus{border-color:var(--accent)}button{width:100%;border:0;border-radius:12px;padding:15px;margin-top:20px;background:var(--accent);color:#081020;font-weight:800;font-size:16px;cursor:pointer}.hint{font-size:13px;color:var(--muted)}.notice{margin-top:18px;padding:14px;border-radius:12px;background:#1c2940;border:1px solid var(--line);font-size:14px;line-height:1.5}.status{margin-top:12px;color:#c9d6f3;font-size:14px;overflow-wrap:anywhere}a{color:#b5c7ff}footer{text-align:center;color:var(--muted);font-size:12px;margin-top:18px}
+</style>
+</head>
+<body>
+<main>
+  <div class="brand"><div class="logo">A</div><div><h1>My First App</h1><div class="sub">Website → Android APK</div></div></div>
+  <section class="card">
+    <h2>Build your Android app</h2>
+    <p>Enter a website you own or have permission to package. The cloud build workflow creates a test APK.</p>
+    <form id="builder">
+      <label for="appName">App name</label>
+      <input id="appName" name="appName" value="My First App" maxlength="40" required>
+      <label for="websiteUrl">Website URL (HTTPS)</label>
+      <input id="websiteUrl" name="websiteUrl" type="url" placeholder="https://example.com" inputmode="url" required>
+      <div class="hint">This first version converts hosted websites only. HTML/ZIP upload comes later.</div>
+      <button type="submit">Prepare APK build</button>
+    </form>
+    <div id="status" class="status" role="status" aria-live="polite"></div>
+    <div class="notice"><strong>Next step:</strong> This interface does not secretly send your data anywhere. After validating your inputs, it opens your GitHub Actions page. Enter the same app name and URL in the workflow's “Run workflow” form to build the APK.</div>
+    <p class="hint">Never paste a GitHub token or password into this page.</p>
+  </section>
+  <footer>Builds run in GitHub Actions. APKs are debug-signed for testing.</footer>
+</main>
+<script>
+const form=document.querySelector('#builder');
+const status=document.querySelector('#status');
+form.addEventListener('submit',e=>{
+  e.preventDefault();
+  const name=document.querySelector('#appName').value.trim();
+  const raw=document.querySelector('#websiteUrl').value.trim();
+  let url;
+  try{url=new URL(raw)}catch{status.textContent='Enter a valid website URL, such as https://example.com';return}
+  if(url.protocol!=='https:'){status.textContent='For safety, this starter kit accepts HTTPS URLs only.';return}
+  if(!name){status.textContent='Enter an app name.';return}
+  status.textContent='Inputs look good. Open your GitHub repository → Actions → Build Website APK → Run workflow. Enter app name: '+name+' | URL: '+url.href;
+  // Change this to your own repository's Actions URL after uploading the project.
+  const actionsUrl='https://github.com/';
+  const open=confirm('Your inputs are valid. Next, open GitHub and run the Build Website APK workflow manually. Your URL is: '+url.href);
+  if(open) window.open(actionsUrl,'_blank','noopener,noreferrer');
+});
+</script>
+</body>
+</html>
